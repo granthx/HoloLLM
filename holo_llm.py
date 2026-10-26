@@ -1372,3 +1372,36 @@ class HoloLLMApp:
                 # Composite: Darkened frame + Crisp Wireframes + Soft Luminous Bloom
                 frame_out = cv2.addWeighted(darkened_frame, 1.0, glow_canvas, 1.0, 0)
                 frame_out = cv2.add(frame_out, cv2.addWeighted(glow_blur, 0.75, np.zeros_like(glow_blur), 0, 0))
+
+                # -------------------------------------------------------------
+                # 6. RENDER HUD OVERLAYS & TELEMETRY PANELS
+                # -------------------------------------------------------------
+                # Render Hand HUD reticles and skeleton on detected hands
+                for hand_data in self.tracker.hand_data_list:
+                    JarvisHUDRenderer.draw_hand_skeleton_hud(frame_out, hand_data)
+
+                # Top-Left System Status Bar
+                JarvisHUDRenderer.draw_top_status_bar(
+                    frame_out,
+                    fps=self.fps,
+                    state_text=self.tracker.state_label,
+                    expansion_pct=self.hologram.expansion_factor * 100.0,
+                    tracking_online=(len(self.tracker.hand_data_list) > 0)
+                )
+
+                # Top-Right Spatial Telemetry
+                pitch_deg = math.degrees(self.camera_3d.pitch)
+                yaw_deg = math.degrees(self.camera_3d.yaw)
+                zoom_factor = 620.0 / max(100.0, self.camera_3d.cam_dist)
+                JarvisHUDRenderer.draw_top_right_camera_telemetry(frame_out, pitch_deg, yaw_deg, zoom_factor)
+
+                # Right-Side Layer Directory
+                JarvisHUDRenderer.draw_right_layer_directory(frame_out, self.hologram.active_layer_idx)
+
+                # Bottom-Center Holographic Info Card
+                JarvisHUDRenderer.draw_bottom_telemetry_card(frame_out, self.hologram.active_layer_idx)
+
+                # Bottom Command Shortcuts Bar
+                JarvisHUDRenderer.draw_bottom_command_bar(frame_out)
+
+                # -------------------------------------------------------------
