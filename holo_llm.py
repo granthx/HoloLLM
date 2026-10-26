@@ -712,3 +712,36 @@ class HandGestureTracker:
 
         self._init_mediapipe()
 
+    def _ensure_task_model(self):
+        """Downloads official hand_landmarker.task if not present locally."""
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        task_path = os.path.join(script_dir, "hand_landmarker.task")
+        if not os.path.exists(task_path):
+            print(f"[HoloLLM] Downloading hand_landmarker.task (~7.8MB) from Google Cloud...")
+            try:
+                urllib.request.urlretrieve(self.MODEL_URL, task_path)
+                print("[HoloLLM] Model download complete!")
+            except Exception as e:
+                print(f"[HoloLLM] Error downloading model: {e}")
+                return None
+        return task_path
+
+    def _init_mediapipe(self):
+        """Initializes either Tasks API or Solutions API based on runtime availability."""
+        # Try MediaPipe Tasks API first (MediaPipe 0.10.x+)
+        try:
+            from mediapipe.tasks import python
+            from mediapipe.tasks.python import vision
+            task_file = self._ensure_task_model()
+            if task_file and os.path.exists(task_file):
+                base_options = python.BaseOptions(model_asset_path=task_file)
+                options = vision.HandLandmarkerOptions(
+                    base_options=base_options,
+                    num_hands=2,
+                    min_hand_detection_confidence=0.70,
+                    min_hand_presence_confidence=0.65,
+                    running_mode=vision.RunningMode.IMAGE
+                )
+                self.detector = vision.HandLandmarker.create_from_options(options)
+                self.backend = "tasks"
+                print("[HoloLLM] Initialized MediaPipe Vision Tasks HandLandmarker.")
