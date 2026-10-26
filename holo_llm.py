@@ -1273,3 +1273,36 @@ class HoloLLMApp:
                     pointer_xy = (float(self.tracker.pointer_pos_2d[0]), float(self.tracker.pointer_pos_2d[1]))
                 else:
                     pointer_xy = (float(self.mouse_cursor_pos[0]), float(self.mouse_cursor_pos[1]))
+
+                # Hit-test layers against pointer coordinate (Depth-sorted raycasting)
+                layer_hit_candidates = []
+                layer_projected_hulls = {}
+
+                for l_idx in range(self.hologram.num_layers):
+                    hull_corners_3d = self.hologram.build_layer_hull_vertices(l_idx)
+                    pts_2d, depths, valid = self.camera_3d.project_points(hull_corners_3d, w_frame, h_frame)
+
+                    if np.all(valid):
+                        hull_2d = cv2.convexHull(pts_2d)
+                        layer_projected_hulls[l_idx] = (pts_2d, hull_2d)
+                        avg_depth = float(np.mean(depths))
+
+                        # 2D Point-in-polygon collision test
+                        inside = cv2.pointPolygonTest(hull_2d, pointer_xy, False) >= 0
+                        if inside:
+                            layer_hit_candidates.append((avg_depth, l_idx))
+
+                # Select front-most touched layer (closest depth)
+                if self.hologram.locked_layer_idx is not None:
+                    self.hologram.active_layer_idx = self.hologram.locked_layer_idx
+                elif layer_hit_candidates:
+                    layer_hit_candidates.sort(key=lambda item: item[0])
+                    self.hologram.active_layer_idx = layer_hit_candidates[0][1]
+                else:
+                    self.hologram.active_layer_idx = None
+
+                # Render Holographic Pedestal Floor
+                pedestal_segments = self.hologram.build_holographic_pedestal()
+                for pA, pB, style in pedestal_segments:
+                    seg_pts = np.stack([pA, pB], axis=0)
+                    pts_2d, _, valid = self.camera_3d.project_points(seg_pts, w_frame, h_frame)
