@@ -1042,3 +1042,36 @@ class JarvisHUDRenderer:
                         cv2.FONT_HERSHEY_SIMPLEX, 0.40, COLOR_GOLD_HOVER, 1, cv2.LINE_AA)
             return
 
+        data = LLM_LAYERS_DATA[layer_idx]
+        JarvisHUDRenderer.draw_chamfered_panel(img, x, y, w, h, chamfer=16, color_bg=(12, 18, 28), color_border=COLOR_GOLD_HOVER)
+
+        # Header Title & Category
+        title_str = f"LAYER {data['id']}/8: {data['name']}"
+        cv2.putText(img, title_str, (x + 24, y + 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.62, COLOR_GOLD_BRIGHT, 2, cv2.LINE_AA)
+        cv2.putText(img, f"[{data['category']}]", (x + w - 310, y + 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.42, COLOR_CYAN_GLOW, 1, cv2.LINE_AA)
+
+        # Separator line
+        cv2.line(img, (x + 24, y + 40), (x + w - 24, y + 40), COLOR_GOLD_HOVER, 1)
+
+        # Tensor Shape & Formula
+        cv2.putText(img, f"TENSOR SHAPE: {data['tensor_shape']}", (x + 24, y + 64),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.46, (255, 255, 120), 1, cv2.LINE_AA)
+        cv2.putText(img, f"MATH FORMULA: {data['formula']}", (x + 24, y + 88),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.46, COLOR_GOLD_HOVER, 1, cv2.LINE_AA)
+
+        # Architectural Role & Details
+        cv2.putText(img, f"ROLE: {data['role']}", (x + 24, y + 112),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.42, COLOR_HUD_TEXT, 1, cv2.LINE_AA)
+        for d_i, line in enumerate(data['details'][:2]):
+            cv2.putText(img, line, (x + 24, y + 134 + d_i * 20),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.38, (190, 205, 220), 1, cv2.LINE_AA)
+
+    @staticmethod
+    def draw_bottom_command_bar(img):
+        """Draws bottom keyboard & interaction shortcuts helper bar."""
+        h_img, w_img = img.shape[:2]
+        commands = "[SPACE] Explode  |  [R] Reset  |  [A] Auto-Rotate  |  [1-8] Direct Select  |  [0] Clear  |  [+/-] Zoom  |  [Q] Quit"
+        cv2.putText(img, commands, ((w_img - 840) // 2, h_img - 15),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.40, (140, 160, 180), 1, cv2.LINE_AA)
