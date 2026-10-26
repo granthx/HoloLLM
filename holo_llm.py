@@ -1009,3 +1009,36 @@ class JarvisHUDRenderer:
                 cv2.rectangle(img, (x + 10, ly - 16), (x + w - 10, ly + 6), COLOR_GOLD_HOVER, 1)
                 dot_color = COLOR_GOLD_BRIGHT
                 text_color = COLOR_GOLD_BRIGHT
+                prefix = ">"
+            else:
+                dot_color = COLOR_CYAN_DIM
+                text_color = COLOR_HUD_TEXT
+                prefix = " "
+
+            cv2.circle(img, (x + 20, ly - 5), 3, dot_color, -1, cv2.LINE_AA)
+            cv2.putText(img, f"{prefix} {i+1}. {layer_title[:17]}", (x + 30, ly),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.38, text_color, 1 if not is_active else 2, cv2.LINE_AA)
+
+    @staticmethod
+    def draw_bottom_telemetry_card(img, layer_idx):
+        """Draws the detailed mathematical and architectural telemetry card for selected layer."""
+        h_img, w_img = img.shape[:2]
+        w, h = 760, 175
+        x = (w_img - w) // 2
+        y = h_img - h - 45
+
+        if layer_idx is None:
+            # Default Overview Card
+            JarvisHUDRenderer.draw_chamfered_panel(img, x, y, w, h, chamfer=16, color_bg=(10, 14, 22), color_border=COLOR_CYAN_DIM)
+            cv2.putText(img, "LLM NEURAL OVERVIEW // NO LAYER PINNED", (x + 24, y + 32),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.60, COLOR_GOLD_BRIGHT, 2, cv2.LINE_AA)
+            cv2.putText(img, "AUTOREGRESSIVE TRANSFORMER DECODER STACK (LLAMA / GPT ARCHITECTURE)", (x + 24, y + 60),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.44, COLOR_CYAN_GLOW, 1, cv2.LINE_AA)
+            cv2.putText(img, "Interact via Hand Gestures or Keyboard to inspect tensor mathematics:", (x + 24, y + 90),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.42, COLOR_HUD_TEXT, 1, cv2.LINE_AA)
+            cv2.putText(img, "  * Single-Hand Pinch = 3D Orbit Rotate  |  Two-Hand Distance = Explode Layers", (x + 24, y + 115),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.40, COLOR_GOLD_HOVER, 1, cv2.LINE_AA)
+            cv2.putText(img, "  * Index Finger Pointer = Touch Inspect Layer  |  Keys [1-8] = Select Layer", (x + 24, y + 140),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.40, COLOR_GOLD_HOVER, 1, cv2.LINE_AA)
+            return
+
