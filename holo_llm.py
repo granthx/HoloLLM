@@ -349,3 +349,36 @@ class TransformerHologram:
 
     def build_holographic_pedestal(self):
         """Builds concentric circular emitter rings and compass ticks at the hologram base."""
+        y_base = self.get_layer_y(0) - 45.0
+        segments = []
+        num_segments = 24
+
+        for radius in [90.0, 140.0, 180.0]:
+            for k in range(num_segments):
+                a1 = (2.0 * math.pi * k) / num_segments
+                a2 = (2.0 * math.pi * (k + 1)) / num_segments
+                pA = np.array([radius * math.cos(a1), y_base, radius * math.sin(a1)])
+                pB = np.array([radius * math.cos(a2), y_base, radius * math.sin(a2)])
+                segments.append((pA, pB, "dim"))
+
+        # Radial compass ticks
+        for a_deg in range(0, 360, 45):
+            rad = math.radians(a_deg)
+            p1 = np.array([140.0 * math.cos(rad), y_base, 140.0 * math.sin(rad)])
+            p2 = np.array([180.0 * math.cos(rad), y_base, 180.0 * math.sin(rad)])
+            segments.append((p1, p2, "accent"))
+
+        return segments
+
+    def build_layer_internal_geometry(self, idx):
+        """
+        Builds custom, mathematically descriptive wireframe lines for each layer.
+        Returns a list of line segments: [ (ptA_3d, ptB_3d, style_tag), ... ]
+        """
+        cy = self.get_layer_y(idx)
+        segments = []
+        hw = self.plate_w * 0.5
+        hd = self.plate_d * 0.5
+
+        # -------------------------------------------------------------
+        # LAYER 1: INPUT & BPE TOKENIZER (Grid of discrete subword blocks)
