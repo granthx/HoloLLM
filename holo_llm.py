@@ -151,3 +151,36 @@ LLM_LAYERS_DATA = [
         "formula": "x_(l+1) = x_l + Attention(RMSNorm(x_l))",
         "role": "Identity Skip Connection & Pre-FFN Normalization",
         "details": [
+            "Preserves an unobstructed information highway along the entire model depth.",
+            "Prevents gradient attenuation and allows individual layers to compute",
+            "incremental residual updates rather than reconstructing full representations."
+        ]
+    },
+    {
+        "id": 7,
+        "name": "SwiGLU FEED-FORWARD (MLP)",
+        "category": "PARAMETRIC KNOWLEDGE NETWORK",
+        "tensor_shape": "[B, S, d] -> [B, S, (8/3)d] -> [B, S, d]",
+        "formula": "SwiGLU(x) = ( Swish(x * W_gate) (x * W_up) ) * W_down",
+        "role": "Position-wise Gated Non-Linear Knowledge Store",
+        "details": [
+            "Expands token vectors into a wide intermediate dimension (e.g. 14,336 dims).",
+            "Gated Swish non-linearity acts as key-value memory retrieving factual",
+            "associations and reasoning patterns learned during large-scale pretraining."
+        ]
+    },
+    {
+        "id": 8,
+        "name": "LM HEAD & SOFTMAX LOGITS",
+        "category": "OUTPUT PROJECTION // NEXT-TOKEN SAMPLING",
+        "tensor_shape": "[B, S, d_model] -> [B, S, Vocab_Size]",
+        "formula": "P(w_t | w_<t) = softmax( Logits / Temperature )",
+        "role": "Unembedding Matrix & Autoregressive Sampling",
+        "details": [
+            "Projects final hidden states back to vocabulary logit distribution.",
+            "Applies Temperature scaling, Top-p (nucleus), and Top-k filtering to sample",
+            "the next token ID, which is fed back into Layer 1 for autoregressive generation."
+        ]
+    }
+]
+
