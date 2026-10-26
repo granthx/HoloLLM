@@ -184,3 +184,36 @@ LLM_LAYERS_DATA = [
     }
 ]
 
+
+# =============================================================================
+# 3. 3D PERSPECTIVE PROJECTION & CAMERA ENGINE
+# =============================================================================
+class Camera3D:
+    """Vectorized 3D perspective camera with Euler rotation, translation, and depth clipping."""
+
+    def __init__(self, focal_length=680.0, cam_distance=620.0):
+        self.focal_length = focal_length
+        self.cam_dist = cam_distance
+        # Initial angles for an appealing 3D isometric viewpoint
+        self.pitch = 0.28   # Pitch around X-axis (radians)
+        self.yaw = -0.42    # Yaw around Y-axis (radians)
+        self.roll = 0.0     # Roll around Z-axis (radians)
+        
+        # Smooth interpolation targets
+        self.target_pitch = self.pitch
+        self.target_yaw = self.yaw
+        self.target_dist = self.cam_dist
+        
+        # Translation offsets
+        self.tx = 0.0
+        self.ty = 0.0
+
+    def update(self, dt=0.033):
+        """Smoothly dampen / lerp current angles toward target angles."""
+        alpha = min(1.0, 10.0 * dt)
+        self.pitch += (self.target_pitch - self.pitch) * alpha
+        self.yaw   += (self.target_yaw - self.yaw) * alpha
+        self.cam_dist += (self.target_dist - self.cam_dist) * alpha
+
+    def get_rotation_matrix(self):
+        """Construct composite rotation matrix R = Ry * Rx * Rz."""
