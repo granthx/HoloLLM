@@ -481,3 +481,36 @@ class TransformerHologram:
                 c8 = np.array([sx - sw * 0.5, cy + sh,  sd * 0.5])
 
                 for a, b in [(c1, c2), (c2, c3), (c3, c4), (c4, c1),
+                             (c5, c6), (c6, c7), (c7, c8), (c8, c5),
+                             (c1, c5), (c2, c6), (c3, c7), (c4, c8)]:
+                    segments.append((a, b, "core"))
+
+                # Diverging ray from input origin below
+                input_root = np.array([0.0, cy - self.collapsed_spacing * 0.8, 0.0])
+                segments.append((input_root, np.array([sx, cy - sh, 0.0]), "accent"))
+
+        # -------------------------------------------------------------
+        # LAYER 5: CAUSAL MULTI-HEAD ATTENTION (Triangular Mask & Arcs)
+        # -------------------------------------------------------------
+        elif idx == 4:
+            # Triangular attention matrix grid
+            grid_n = 5
+            spacing_x = (hw * 1.4) / grid_n
+            spacing_z = (hd * 1.4) / grid_n
+            x_min = - (hw * 1.4) * 0.5
+            z_min = - (hd * 1.4) * 0.5
+
+            for r in range(grid_n):
+                for c in range(grid_n):
+                    px = x_min + c * spacing_x
+                    pz = z_min + r * spacing_z
+                    if c <= r:
+                        # Unmasked attention cell
+                        cell_w = spacing_x * 0.8
+                        cell_d = spacing_z * 0.8
+                        p1 = np.array([px, cy, pz])
+                        p2 = np.array([px + cell_w, cy, pz])
+                        p3 = np.array([px + cell_w, cy, pz + cell_d])
+                        p4 = np.array([px, cy, pz + cell_d])
+                        segments.append((p1, p2, "core"))
+                        segments.append((p2, p3, "core"))
