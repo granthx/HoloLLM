@@ -1108,3 +1108,36 @@ class JarvisHUDRenderer:
         # Thumb tip target reticle
         cv2.circle(img, tuple(thumb), 6, reticle_color, 1, cv2.LINE_AA)
         cv2.circle(img, tuple(thumb), 2, reticle_color, -1, cv2.LINE_AA)
+
+        # Dynamic Tension Line between Thumb and Index
+        p_dist = hand_data["pinch_dist"]
+        tension_color = COLOR_ORANGE_ALERT if hand_data["is_pinched"] else COLOR_CYAN_DIM
+        cv2.line(img, tuple(thumb), tuple(index), tension_color, 1, cv2.LINE_AA)
+
+        # Live Distance Readout
+        mid_pt = ((thumb[0] + index[0]) // 2 + 10, (thumb[1] + index[1]) // 2 - 10)
+        label_text = f"PINCH: {int(p_dist)}px" if not hand_data["is_pinched"] else "GRABBED [LOCKED]"
+        cv2.putText(img, label_text, mid_pt, cv2.FONT_HERSHEY_SIMPLEX, 0.38, tension_color, 1, cv2.LINE_AA)
+
+        # Wrist Telemetry
+        cv2.putText(img, f"{hand_data['label'][0]}-HAND [{int(hand_data['score']*100)}%]",
+                    (wrist[0] - 30, wrist[1] + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.36, COLOR_CYAN_DIM, 1, cv2.LINE_AA)
+
+
+# =============================================================================
+# 7. MAIN AR APPLICATION CONTROLLER (HOLO-LLM)
+# =============================================================================
+class HoloLLMApp:
+    """Master Application Class orchestrating Video Capture, MediaPipe, 3D Engine, and HUD."""
+
+    def __init__(self):
+        self.camera_3d = Camera3D()
+        self.hologram = TransformerHologram()
+        self.tracker = HandGestureTracker()
+
+        # Interaction State
+        self.auto_rotate = True
+        self.last_pinch_pos = None
+        self.mouse_dragging = False
+        self.last_mouse_pos = (0, 0)
+        self.mouse_cursor_pos = (0, 0)
