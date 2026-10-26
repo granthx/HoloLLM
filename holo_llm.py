@@ -580,3 +580,36 @@ class TransformerHologram:
             ]
             mid = [
                 np.array([-mw, cy, -md]), np.array([mw, cy, -md]),
+                np.array([mw, cy, md]), np.array([-mw, cy, md])
+            ]
+            top = [
+                np.array([-tn, cy + h_half, -tn]), np.array([tn, cy + h_half, -tn]),
+                np.array([tn, cy + h_half, tn]), np.array([-tn, cy + h_half, tn])
+            ]
+
+            # Bottom ring
+            for i in range(4):
+                segments.append((bot[i], bot[(i + 1) % 4], "core"))
+            # Middle ring
+            for i in range(4):
+                segments.append((mid[i], mid[(i + 1) % 4], "accent"))
+            # Top ring
+            for i in range(4):
+                segments.append((top[i], top[(i + 1) % 4], "core"))
+            # Expansion & Contraction struts
+            for i in range(4):
+                segments.append((bot[i], mid[i], "core"))
+                segments.append((mid[i], top[i], "core"))
+
+        # -------------------------------------------------------------
+        # LAYER 8: LM HEAD & SOFTMAX LOGITS (Funnel + 3D Bar-Chart Histogram)
+        # -------------------------------------------------------------
+        elif idx == 7:
+            # Converging Funnel Lines
+            fh = 8.0
+            segments.append((np.array([-hw * 0.8, cy - fh, -hd * 0.8]), np.array([-25.0, cy, -25.0]), "dim"))
+            segments.append((np.array([ hw * 0.8, cy - fh, -hd * 0.8]), np.array([ 25.0, cy, -25.0]), "dim"))
+            segments.append((np.array([ hw * 0.8, cy - fh,  hd * 0.8]), np.array([ 25.0, cy,  25.0]), "dim"))
+            segments.append((np.array([-hw * 0.8, cy - fh,  hd * 0.8]), np.array([-25.0, cy,  25.0]), "dim"))
+
+            # 3D Bar-Chart Logits Histogram
