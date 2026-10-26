@@ -976,3 +976,36 @@ class JarvisHUDRenderer:
         y = 20
         JarvisHUDRenderer.draw_chamfered_panel(img, x, y, w, h, chamfer=10, color_bg=(10, 15, 24), color_border=COLOR_CYAN_DIM)
 
+        cv2.putText(img, "SPATIAL TELEMETRY", (x + 14, y + 22),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.45, COLOR_GOLD_BRIGHT, 1, cv2.LINE_AA)
+        cv2.putText(img, f"ROTATION: P {pitch_deg:+5.1f} | Y {yaw_deg:+5.1f}", (x + 14, y + 42),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.40, COLOR_HUD_TEXT, 1, cv2.LINE_AA)
+        cv2.putText(img, f"OPTICAL ZOOM: {zoom_factor:3.1f}x", (x + 14, y + 58),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.38, COLOR_CYAN_GLOW, 1, cv2.LINE_AA)
+
+    @staticmethod
+    def draw_right_layer_directory(img, active_idx):
+        """Draws the vertical directory of the 8 Transformer layers on the right screen border."""
+        h_img, w_img = img.shape[:2]
+        w, h = 240, 275
+        x = w_img - w - 20
+        y = 100
+        JarvisHUDRenderer.draw_chamfered_panel(img, x, y, w, h, chamfer=12, color_bg=(10, 15, 24), color_border=COLOR_CYAN_DIM)
+
+        cv2.putText(img, "TRANSFORMER STACK (8)", (x + 16, y + 24),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.48, COLOR_GOLD_BRIGHT, 1, cv2.LINE_AA)
+        cv2.line(img, (x + 16, y + 30), (x + w - 16, y + 30), COLOR_CYAN_DIM, 1)
+
+        start_y = y + 52
+        step_y = 26
+        for i in range(8):
+            is_active = (active_idx == i)
+            layer_title = LLM_LAYERS_DATA[i]["name"]
+            ly = start_y + i * step_y
+
+            if is_active:
+                # Active highlighted background strip
+                cv2.rectangle(img, (x + 10, ly - 16), (x + w - 10, ly + 6), (40, 60, 80), -1)
+                cv2.rectangle(img, (x + 10, ly - 16), (x + w - 10, ly + 6), COLOR_GOLD_HOVER, 1)
+                dot_color = COLOR_GOLD_BRIGHT
+                text_color = COLOR_GOLD_BRIGHT
