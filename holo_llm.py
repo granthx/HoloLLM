@@ -316,3 +316,36 @@ class TransformerHologram:
         # Advance particles
         for p in self.particles:
             p["t"] += p["speed"] * dt
+            if p["t"] > 1.0:
+                p["t"] = 0.0
+                p["speed"] = np.random.uniform(0.14, 0.36)
+                p["rail"] = np.random.choice([0, 1, 2, 3, 4])
+
+    def get_layer_y(self, idx):
+        """Returns the central Y coordinate for layer `idx` based on expansion."""
+        spacing = self.collapsed_spacing + self.expansion_factor * (self.expanded_spacing - self.collapsed_spacing)
+        # Center the stack vertically: idx 0 is bottom, idx 7 is top
+        return (idx - 3.5) * spacing
+
+    def build_layer_hull_vertices(self, idx):
+        """Returns the 8 bounding corners of a layer plate for 3D drawing & 2D hit testing."""
+        cy = self.get_layer_y(idx)
+        hw = self.plate_w * 0.5
+        hd = self.plate_d * 0.5
+        hh = self.plate_h * 0.5
+
+        # Bottom 4 corners, then Top 4 corners
+        corners = np.array([
+            [-hw, cy - hh, -hd],
+            [ hw, cy - hh, -hd],
+            [ hw, cy - hh,  hd],
+            [-hw, cy - hh,  hd],
+            [-hw, cy + hh, -hd],
+            [ hw, cy + hh, -hd],
+            [ hw, cy + hh,  hd],
+            [-hw, cy + hh,  hd],
+        ], dtype=np.float32)
+        return corners
+
+    def build_holographic_pedestal(self):
+        """Builds concentric circular emitter rings and compass ticks at the hologram base."""
