@@ -1174,3 +1174,36 @@ class HoloLLMApp:
         print("=" * 70)
         print("  HoloLLM: AR Transformer Architecture Visualizer (Iron-Man / Jarvis)")
         print("=" * 70)
+        print("Connecting to Webcam and Initializing Hand CNN...")
+
+        cap = cv2.VideoCapture(0)
+        use_synthetic = False
+        if not cap.isOpened():
+            print("[WARNING] Default webcam (ID 0) not accessible! Falling back to Synthetic Cyber Grid.")
+            use_synthetic = True
+        else:
+            # Request 1280x720 16:9 HD resolution
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+        window_name = "HoloLLM // AR Transformer Architecture Visualizer"
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(window_name, 1280, 720)
+        cv2.setMouseCallback(window_name, self.handle_mouse_events)
+
+        print("\nControls:")
+        print(" - Hand Pinch (1 Hand): Orbit rotate 3D hologram in Pitch & Yaw")
+        print(" - Hand Distance (2 Hands): Explode / Collapse layers")
+        print(" - Index Finger Pointing: Touch inspect layer to view tensor math")
+        print(" - Mouse Left-Drag: Orbit rotate  |  Scroll Wheel: Zoom in/out")
+        print(" - Keys: [SPACE] Explode  |  [R] Reset  |  [A] Auto-Rotate  |  [1-8] Layers  |  [Q] Quit")
+        print("=" * 70)
+
+        try:
+            while True:
+                t_start = time.time()
+                dt = max(0.001, t_start - self.prev_time)
+                self.prev_time = t_start
+                self.fps = 0.9 * self.fps + 0.1 * (1.0 / dt)
+
+                # -------------------------------------------------------------
