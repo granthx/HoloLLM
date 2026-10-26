@@ -877,3 +877,36 @@ class HandGestureTracker:
                 self.pointer_pos_2d = h0["index_tip"]
                 self.state_label = "INDEX POINTER [TOUCH INSPECTING]"
             else:
+                self.pointer_pos_2d = h0["index_tip"]
+                self.state_label = "HAND DETECTED [HOVER]"
+
+        elif detected_count >= 2:
+            h0, h1 = self.hand_data_list[0], self.hand_data_list[1]
+            dist_hands = float(np.linalg.norm(h0["index_tip"] - h1["index_tip"]))
+            self.two_hand_dist = dist_hands
+
+            # Allow rotation if one hand is pinched
+            if h0["is_pinched"] and not h1["is_pinched"]:
+                self.is_pinching = True
+                self.pinch_pos_2d = h0["index_tip"]
+            elif h1["is_pinched"] and not h0["is_pinched"]:
+                self.is_pinching = True
+                self.pinch_pos_2d = h1["index_tip"]
+
+            if h0["is_pointing"]:
+                self.pointer_pos_2d = h0["index_tip"]
+            elif h1["is_pointing"]:
+                self.pointer_pos_2d = h1["index_tip"]
+            else:
+                self.pointer_pos_2d = h0["index_tip"]
+
+            self.state_label = f"TWO-HAND EXPAND METER [D: {int(dist_hands)}px]"
+
+
+# =============================================================================
+# 6. JARVIS / SCI-FI HUD & TELEMETRY RENDERER
+# =============================================================================
+class JarvisHUDRenderer:
+    """Renders Iron-Man/Jarvis HUD graphics, holographic panels, ASCII math, and glows."""
+
+    @staticmethod
