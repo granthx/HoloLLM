@@ -283,3 +283,36 @@ class TransformerHologram:
     """Generates and manages the 3D wireframe geometry for the 8 LLM layers."""
 
     def __init__(self):
+        self.num_layers = 8
+        self.expansion_factor = 0.0      # 0.0 = compact core, 1.0 = fully exploded
+        self.target_expansion = 0.0
+        self.active_layer_idx = None     # Currently hovered / selected layer (0-7)
+        self.locked_layer_idx = None     # User-pinned layer via keyboard / tap
+        
+        # Dimensions of each layer plate (in world 3D units)
+        self.plate_w = 150.0  # Width (X-axis)
+        self.plate_d = 130.0  # Depth (Z-axis)
+        self.plate_h = 10.0   # Thickness (Y-axis)
+        
+        self.collapsed_spacing = 15.0
+        self.expanded_spacing = 68.0
+
+        # Dataflow particles travelling through layers
+        self.num_particles = 28
+        self.particles = []
+        for _ in range(self.num_particles):
+            self.particles.append({
+                "t": np.random.uniform(0.0, 1.0),
+                "speed": np.random.uniform(0.12, 0.32),
+                "rail": np.random.choice([0, 1, 2, 3, 4]), # 0=center, 1-4=corners
+                "offset": np.random.uniform(-4.0, 4.0, size=2)
+            })
+
+    def update_physics(self, dt=0.033):
+        """Update expansion lerp and advance dataflow particles."""
+        alpha = min(1.0, 8.0 * dt)
+        self.expansion_factor += (self.target_expansion - self.expansion_factor) * alpha
+
+        # Advance particles
+        for p in self.particles:
+            p["t"] += p["speed"] * dt
