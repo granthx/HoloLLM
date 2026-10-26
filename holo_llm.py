@@ -1405,3 +1405,36 @@ class HoloLLMApp:
                 JarvisHUDRenderer.draw_bottom_command_bar(frame_out)
 
                 # -------------------------------------------------------------
+                # 7. DISPLAY & USER INPUT HANDLING
+                # -------------------------------------------------------------
+                cv2.imshow(window_name, frame_out)
+                key = cv2.waitKey(1) & 0xFF
+
+                if key in [ord('q'), ord('Q'), 27]: # Q or ESC to quit
+                    break
+                elif key == ord(' '): # SPACE: Toggle Explode / Collapse
+                    if self.hologram.target_expansion < 0.5:
+                        self.hologram.target_expansion = 1.0
+                    else:
+                        self.hologram.target_expansion = 0.0
+                elif key in [ord('r'), ord('R')]: # Reset Camera Orientation
+                    self.camera_3d.target_pitch = 0.28
+                    self.camera_3d.target_yaw = -0.42
+                    self.camera_3d.target_dist = 620.0
+                    self.hologram.target_expansion = 0.0
+                    self.hologram.locked_layer_idx = None
+                    self.auto_rotate = True
+                elif key in [ord('a'), ord('A')]: # Toggle Auto-Rotate
+                    self.auto_rotate = not self.auto_rotate
+                elif key in [ord('+'), ord('=')]: # Zoom In
+                    self.camera_3d.target_dist = max(350.0, self.camera_3d.target_dist - 50.0)
+                elif key in [ord('-'), ord('_')]: # Zoom Out
+                    self.camera_3d.target_dist = min(1200.0, self.camera_3d.target_dist + 50.0)
+                elif ord('1') <= key <= ord('8'): # Select Layer 1 to 8
+                    selected_idx = key - ord('1')
+                    self.hologram.locked_layer_idx = selected_idx
+                    self.hologram.target_expansion = max(0.65, self.hologram.target_expansion)
+                elif key == ord('0'): # Clear selection
+                    self.hologram.locked_layer_idx = None
+
+        finally:
