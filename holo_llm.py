@@ -514,3 +514,36 @@ class TransformerHologram:
                         p4 = np.array([px, cy, pz + cell_d])
                         segments.append((p1, p2, "core"))
                         segments.append((p2, p3, "core"))
+                        segments.append((p3, p4, "core"))
+                        segments.append((p4, p1, "core"))
+                    else:
+                        # Causal Masked cell (Drawn with dim 'X')
+                        segments.append((np.array([px, cy, pz]), np.array([px + spacing_x * 0.5, cy, pz + spacing_z * 0.5]), "dim"))
+
+            # Arched cross-attention curves
+            for arc_k in [-35.0, 0.0, 35.0]:
+                pA = np.array([arc_k, cy, -hd * 0.6])
+                pB = np.array([arc_k, cy + 12.0, 0.0])
+                pC = np.array([arc_k, cy, hd * 0.6])
+                segments.append((pA, pB, "accent"))
+                segments.append((pB, pC, "accent"))
+
+        # -------------------------------------------------------------
+        # LAYER 6: RESIDUAL STREAM + RMSNorm (Bypass Highways + Add Circle)
+        # -------------------------------------------------------------
+        elif idx == 5:
+            # Inner plate frame
+            in_w, in_d = hw * 0.7, hd * 0.7
+            segments.append((np.array([-in_w, cy, -in_d]), np.array([in_w, cy, -in_d]), "dim"))
+            segments.append((np.array([in_w, cy, -in_d]), np.array([in_w, cy, in_d]), "dim"))
+            segments.append((np.array([in_w, cy, in_d]), np.array([-in_w, cy, in_d]), "dim"))
+            segments.append((np.array([-in_w, cy, in_d]), np.array([-in_w, cy, -in_d]), "dim"))
+
+            # Twin bypass highway arches looping wide outside the layer
+            arch_w = hw * 1.35
+            for sign in [-1.0, 1.0]:
+                p_start = np.array([sign * hw * 0.6, cy - 22.0, 0.0])
+                p_mid   = np.array([sign * arch_w, cy, 0.0])
+                p_end   = np.array([sign * hw * 0.6, cy + 22.0, 0.0])
+                segments.append((p_start, p_mid, "accent"))
+                segments.append((p_mid, p_end, "accent"))
