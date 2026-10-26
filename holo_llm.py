@@ -679,3 +679,36 @@ class TransformerHologram:
             base_offset = corner_offsets[p["rail"]]
             pt = base_offset + np.array([p["offset"][0], cur_y, p["offset"][1]], dtype=np.float32)
             pts_3d.append(pt)
+
+        return np.array(pts_3d, dtype=np.float32)
+
+
+# =============================================================================
+# 5. MEDIAPIPE CNN HAND GESTURE CONTROLLER (DUAL BACKEND)
+# =============================================================================
+class HandGestureTracker:
+    """
+    Robust MediaPipe Hands wrapper supporting both:
+    1. MediaPipe Tasks API (mediapipe.tasks.python.vision.HandLandmarker)
+    2. Legacy MediaPipe Solutions API (mediapipe.solutions.hands)
+    Applies Exponential Moving Average (EMA) filtering for rock-solid tracking.
+    """
+
+    MODEL_URL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task"
+
+    def __init__(self):
+        self.backend = None
+        self.detector = None
+        self.prev_landmarks = {}
+        self.alpha_ema = 0.65  # 0.65 current, 0.35 previous
+
+        # Gesture State Machine
+        self.state_label = "IDLE / SEARCHING"
+        self.is_pinching = False
+        self.pinch_pos_2d = None
+        self.pointer_pos_2d = None
+        self.two_hand_dist = None
+        self.hand_data_list = []
+
+        self._init_mediapipe()
+
