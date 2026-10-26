@@ -1339,3 +1339,36 @@ class HoloLLMApp:
                     # Custom Internal Wireframe Geometry
                     internals = self.hologram.build_layer_internal_geometry(l_idx)
                     for ptA, ptB, style in internals:
+                        seg_pts = np.stack([ptA, ptB], axis=0)
+                        pts_2d, _, valid = self.camera_3d.project_points(seg_pts, w_frame, h_frame)
+                        if np.all(valid):
+                            if style == "accent":
+                                col = accent_color
+                                thick = 2
+                            elif style == "dim":
+                                col = dim_color
+                                thick = 1
+                            else:
+                                col = plate_color
+                                thick = 1
+                            cv2.line(glow_canvas, tuple(pts_2d[0]), tuple(pts_2d[1]), col, thick, cv2.LINE_AA)
+
+                # Render Animated Dataflow Forward-Pass Particles
+                part_pts_3d = self.hologram.get_particle_positions_3d()
+                part_pts_2d, _, part_valid = self.camera_3d.project_points(part_pts_3d, w_frame, h_frame)
+                for i, (pt_2d, val) in enumerate(zip(part_pts_2d, part_valid)):
+                    if val:
+                        cv2.circle(glow_canvas, tuple(pt_2d), 3, COLOR_WHITE_PULSE, -1, cv2.LINE_AA)
+                        cv2.circle(glow_canvas, tuple(pt_2d), 6, COLOR_GOLD_BRIGHT, 1, cv2.LINE_AA)
+
+                # -------------------------------------------------------------
+                # 5. AUTHENTIC NEON GLOW BLOOM FILTER (BLUR & ADDWEIGHTED)
+                # -------------------------------------------------------------
+                small_w, small_h = max(1, w_frame // 4), max(1, h_frame // 4)
+                glow_small = cv2.resize(glow_canvas, (small_w, small_h), interpolation=cv2.INTER_LINEAR)
+                glow_blur_small = cv2.GaussianBlur(glow_small, (15, 15), 0)
+                glow_blur = cv2.resize(glow_blur_small, (w_frame, h_frame), interpolation=cv2.INTER_LINEAR)
+
+                # Composite: Darkened frame + Crisp Wireframes + Soft Luminous Bloom
+                frame_out = cv2.addWeighted(darkened_frame, 1.0, glow_canvas, 1.0, 0)
+                frame_out = cv2.add(frame_out, cv2.addWeighted(glow_blur, 0.75, np.zeros_like(glow_blur), 0, 0))
