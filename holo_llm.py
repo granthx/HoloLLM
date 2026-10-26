@@ -745,3 +745,36 @@ class HandGestureTracker:
                 self.detector = vision.HandLandmarker.create_from_options(options)
                 self.backend = "tasks"
                 print("[HoloLLM] Initialized MediaPipe Vision Tasks HandLandmarker.")
+                return
+        except Exception as e:
+            print(f"[HoloLLM] Tasks API initialization failed: {e}. Trying Solutions API...")
+
+        # Try Legacy MediaPipe Solutions API (MediaPipe < 0.10.x)
+        try:
+            if hasattr(mp, "solutions") and hasattr(mp.solutions, "hands"):
+                self.detector = mp.solutions.hands.Hands(
+                    static_image_mode=False,
+                    max_num_hands=2,
+                    min_detection_confidence=0.72,
+                    min_tracking_confidence=0.65
+                )
+                self.backend = "solutions"
+                print("[HoloLLM] Initialized MediaPipe Legacy Solutions Hands.")
+                return
+        except Exception as e:
+            print(f"[HoloLLM] Solutions API initialization failed: {e}")
+
+        print("[HoloLLM WARNING] No hardware CNN hand tracker available. Running with Mouse & Keyboard controls.")
+        self.backend = None
+
+    def close(self):
+        """Safely closes MediaPipe detector to prevent process shutdown warnings."""
+        if self.detector is not None:
+            try:
+                self.detector.close()
+            except Exception:
+                pass
+
+    def process_frame(self, frame_bgr):
+        """Extracts 21 3D landmarks per hand and detects gestures."""
+        h, w = frame_bgr.shape[:2]
