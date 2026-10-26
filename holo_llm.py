@@ -547,3 +547,36 @@ class TransformerHologram:
                 p_end   = np.array([sign * hw * 0.6, cy + 22.0, 0.0])
                 segments.append((p_start, p_mid, "accent"))
                 segments.append((p_mid, p_end, "accent"))
+
+            # Summation (+) node circle
+            sum_r = 12.0
+            for k in range(8):
+                a1 = (2.0 * math.pi * k) / 8.0
+                a2 = (2.0 * math.pi * (k + 1)) / 8.0
+                segments.append((
+                    np.array([sum_r * math.cos(a1), cy, sum_r * math.sin(a1)]),
+                    np.array([sum_r * math.cos(a2), cy, sum_r * math.sin(a2)]),
+                    "accent"
+                ))
+            segments.append((np.array([-sum_r * 0.7, cy, 0.0]), np.array([sum_r * 0.7, cy, 0.0]), "accent"))
+            segments.append((np.array([0.0, cy, -sum_r * 0.7]), np.array([0.0, cy, sum_r * 0.7]), "accent"))
+
+        # -------------------------------------------------------------
+        # LAYER 7: SwiGLU FEED-FORWARD (Double-Hourglass / Diamond Expansion)
+        # -------------------------------------------------------------
+        elif idx == 6:
+            # Bottom neck (d_model)
+            bn = 26.0
+            # Middle expansion (4 * d_model)
+            mw = hw * 1.3
+            md = hd * 1.3
+            # Top contraction (d_model)
+            tn = 26.0
+
+            h_half = 14.0
+            bot = [
+                np.array([-bn, cy - h_half, -bn]), np.array([bn, cy - h_half, -bn]),
+                np.array([bn, cy - h_half, bn]), np.array([-bn, cy - h_half, bn])
+            ]
+            mid = [
+                np.array([-mw, cy, -md]), np.array([mw, cy, -md]),
