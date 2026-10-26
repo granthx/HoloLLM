@@ -250,3 +250,36 @@ class Camera3D:
             valid_mask: (N,) boolean mask indicating points in front of camera
         """
         if len(points_3d) == 0:
+            return np.empty((0, 2), dtype=np.int32), np.empty(0, dtype=np.float32), np.empty(0, dtype=bool)
+
+        R = self.get_rotation_matrix()
+        # Rotate points: (N, 3) @ (3, 3).T
+        rot_pts = points_3d @ R.T
+
+        # Camera space coordinates
+        x_cam = rot_pts[:, 0] + self.tx
+        y_cam = rot_pts[:, 1] + self.ty
+        z_cam = rot_pts[:, 2] + self.cam_dist
+
+        # Valid points are strictly in front of the camera plane
+        valid = z_cam > 25.0
+        safe_z = np.where(valid, z_cam, 1000.0)
+
+        cx = screen_w * 0.5
+        cy = screen_h * 0.5
+
+        # Invert y because screen coordinates point downwards
+        u = (self.focal_length * x_cam / safe_z) + cx
+        v = (-self.focal_length * y_cam / safe_z) + cy
+
+        points_2d = np.stack([u, v], axis=-1).astype(np.int32)
+        return points_2d, z_cam, valid
+
+
+# =============================================================================
+# 4. 3D WIREFRAME MESH GENERATOR (8 TRANSFORMER LAYERS & PEDESTAL)
+# =============================================================================
+class TransformerHologram:
+    """Generates and manages the 3D wireframe geometry for the 8 LLM layers."""
+
+    def __init__(self):
