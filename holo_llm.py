@@ -1075,3 +1075,36 @@ class JarvisHUDRenderer:
         commands = "[SPACE] Explode  |  [R] Reset  |  [A] Auto-Rotate  |  [1-8] Direct Select  |  [0] Clear  |  [+/-] Zoom  |  [Q] Quit"
         cv2.putText(img, commands, ((w_img - 840) // 2, h_img - 15),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.40, (140, 160, 180), 1, cv2.LINE_AA)
+
+    @staticmethod
+    def draw_hand_skeleton_hud(img, hand_data):
+        """Draws futuristic glowing target reticles, tension meters, and skeleton lines."""
+        landmarks = hand_data["landmarks"]
+        thumb = hand_data["thumb_tip"].astype(int)
+        index = hand_data["index_tip"].astype(int)
+        wrist = hand_data["wrist"].astype(int)
+
+        # Draw glowing cybernetic bone lines
+        for p1_idx, p2_idx in HAND_CONNECTIONS:
+            p1 = landmarks[p1_idx, :2].astype(int)
+            p2 = landmarks[p2_idx, :2].astype(int)
+            cv2.line(img, tuple(p1), tuple(p2), (180, 120, 20), 1, cv2.LINE_AA)
+
+        # Draw knuckle joint beads
+        for j_idx in range(21):
+            j_pt = landmarks[j_idx, :2].astype(int)
+            cv2.circle(img, tuple(j_pt), 2, COLOR_CYAN_GLOW, -1, cv2.LINE_AA)
+
+        # Futuristic fingertip reticle on Index tip
+        reticle_color = COLOR_GOLD_BRIGHT if hand_data["is_pinched"] else COLOR_CYAN_GLOW
+        cv2.circle(img, tuple(index), 11, reticle_color, 1, cv2.LINE_AA)
+        cv2.circle(img, tuple(index), 3, reticle_color, -1, cv2.LINE_AA)
+        # 4 Crosshair tick marks
+        cv2.line(img, (index[0] - 16, index[1]), (index[0] - 8, index[1]), reticle_color, 1, cv2.LINE_AA)
+        cv2.line(img, (index[0] + 8, index[1]), (index[0] + 16, index[1]), reticle_color, 1, cv2.LINE_AA)
+        cv2.line(img, (index[0], index[1] - 16), (index[0], index[1] - 8), reticle_color, 1, cv2.LINE_AA)
+        cv2.line(img, (index[0], index[1] + 8), (index[0], index[1] + 16), reticle_color, 1, cv2.LINE_AA)
+
+        # Thumb tip target reticle
+        cv2.circle(img, tuple(thumb), 6, reticle_color, 1, cv2.LINE_AA)
+        cv2.circle(img, tuple(thumb), 2, reticle_color, -1, cv2.LINE_AA)
