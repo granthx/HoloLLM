@@ -1207,3 +1207,36 @@ class HoloLLMApp:
                 self.fps = 0.9 * self.fps + 0.1 * (1.0 / dt)
 
                 # -------------------------------------------------------------
+                # 1. ACQUIRE FRAME
+                # -------------------------------------------------------------
+                if not use_synthetic:
+                    ret, frame = cap.read()
+                    if not ret:
+                        frame = np.zeros((720, 1280, 3), dtype=np.uint8)
+                    else:
+                        # Mirror image horizontally for natural user interaction
+                        frame = cv2.flip(frame, 1)
+                else:
+                    # Generate synthetic animated cyber grid background
+                    frame = np.zeros((720, 1280, 3), dtype=np.uint8)
+                    for gy in range(0, 720, 40):
+                        cv2.line(frame, (0, gy), (1280, gy), (20, 25, 35), 1)
+                    for gx in range(0, 1280, 40):
+                        cv2.line(frame, (gx, 0), (gx, 720), (20, 25, 35), 1)
+
+                h_frame, w_frame = frame.shape[:2]
+
+                # -------------------------------------------------------------
+                # 2. PROCESS HAND TRACKING & GESTURES
+                # -------------------------------------------------------------
+                self.tracker.process_frame(frame)
+
+                # Gesture: Single-hand pinch drag for 3D rotation
+                if self.tracker.is_pinching and self.tracker.pinch_pos_2d is not None:
+                    self.auto_rotate = False
+                    cur_pinch = self.tracker.pinch_pos_2d
+                    if self.last_pinch_pos is not None:
+                        dx = cur_pinch[0] - self.last_pinch_pos[0]
+                        dy = cur_pinch[1] - self.last_pinch_pos[1]
+                        self.camera_3d.target_yaw += dx * 0.009
+                        self.camera_3d.target_pitch -= dy * 0.009
