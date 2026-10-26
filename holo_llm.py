@@ -217,3 +217,36 @@ class Camera3D:
 
     def get_rotation_matrix(self):
         """Construct composite rotation matrix R = Ry * Rx * Rz."""
+        cx, sx = math.cos(self.pitch), math.sin(self.pitch)
+        cy, sy = math.cos(self.yaw), math.sin(self.yaw)
+        cz, sz = math.cos(self.roll), math.sin(self.roll)
+
+        Rx = np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, cx,  -sx],
+            [0.0, sx,   cx]
+        ], dtype=np.float32)
+
+        Ry = np.array([
+            [cy,  0.0, sy],
+            [0.0, 1.0, 0.0],
+            [-sy, 0.0, cy]
+        ], dtype=np.float32)
+
+        Rz = np.array([
+            [cz, -sz, 0.0],
+            [sz,  cz, 0.0],
+            [0.0, 0.0, 1.0]
+        ], dtype=np.float32)
+
+        return Ry @ Rx @ Rz
+
+    def project_points(self, points_3d, screen_w, screen_h):
+        """
+        Projects an (N, 3) array of 3D world coordinates to (N, 2) 2D pixel coordinates.
+        Returns:
+            points_2d: (N, 2) array of (u, v) pixel coordinates (int32)
+            depths: (N,) depth array z_cam for depth sorting
+            valid_mask: (N,) boolean mask indicating points in front of camera
+        """
+        if len(points_3d) == 0:
