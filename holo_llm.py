@@ -448,3 +448,36 @@ class TransformerHologram:
                     a1 = (2.0 * math.pi * k) / num_ring_pts
                     a2 = (2.0 * math.pi * (k + 1)) / num_ring_pts
                     pA = np.array([r * math.cos(a1), cy, r * math.sin(a1)])
+                    pB = np.array([r * math.cos(a2), cy, r * math.sin(a2)])
+                    segments.append((pA, pB, "core"))
+
+            # Crosshair stabilizing spokes
+            segments.append((np.array([-58.0, cy, 0.0]), np.array([58.0, cy, 0.0]), "dim"))
+            segments.append((np.array([0.0, cy, -58.0]), np.array([0.0, cy, 58.0]), "dim"))
+            # Central diamond
+            dm = 10.0
+            segments.append((np.array([-dm, cy, 0.0]), np.array([0.0, cy, dm]), "accent"))
+            segments.append((np.array([0.0, cy, dm]), np.array([dm, cy, 0.0]), "accent"))
+            segments.append((np.array([dm, cy, 0.0]), np.array([0.0, cy, -dm]), "accent"))
+            segments.append((np.array([0.0, cy, -dm]), np.array([-dm, cy, 0.0]), "accent"))
+
+        # -------------------------------------------------------------
+        # LAYER 4: QKV LINEAR PROJECTIONS (3 Parallel Sub-Slabs: Q, K, V)
+        # -------------------------------------------------------------
+        elif idx == 3:
+            slab_xs = [-45.0, 0.0, 45.0]
+            sw = 30.0
+            sd = hd * 1.4
+            sh = 6.0
+            for sx in slab_xs:
+                # Sub-plate box
+                c1 = np.array([sx - sw * 0.5, cy - sh, -sd * 0.5])
+                c2 = np.array([sx + sw * 0.5, cy - sh, -sd * 0.5])
+                c3 = np.array([sx + sw * 0.5, cy - sh,  sd * 0.5])
+                c4 = np.array([sx - sw * 0.5, cy - sh,  sd * 0.5])
+                c5 = np.array([sx - sw * 0.5, cy + sh, -sd * 0.5])
+                c6 = np.array([sx + sw * 0.5, cy + sh, -sd * 0.5])
+                c7 = np.array([sx + sw * 0.5, cy + sh,  sd * 0.5])
+                c8 = np.array([sx - sw * 0.5, cy + sh,  sd * 0.5])
+
+                for a, b in [(c1, c2), (c2, c3), (c3, c4), (c4, c1),
