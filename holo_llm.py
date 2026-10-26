@@ -1306,3 +1306,36 @@ class HoloLLMApp:
                 for pA, pB, style in pedestal_segments:
                     seg_pts = np.stack([pA, pB], axis=0)
                     pts_2d, _, valid = self.camera_3d.project_points(seg_pts, w_frame, h_frame)
+                    if np.all(valid):
+                        col = COLOR_CYAN_DIM if style == "dim" else COLOR_CYAN_GLOW
+                        cv2.line(glow_canvas, tuple(pts_2d[0]), tuple(pts_2d[1]), col, 1, cv2.LINE_AA)
+
+                # Render Backbone Spine Rails
+                spine_rails = self.hologram.build_spine_rails()
+                for pA, pB in spine_rails:
+                    rail_pts = np.stack([pA, pB], axis=0)
+                    pts_2d, depths, valid = self.camera_3d.project_points(rail_pts, w_frame, h_frame)
+                    if np.all(valid):
+                        cv2.line(glow_canvas, tuple(pts_2d[0]), tuple(pts_2d[1]), COLOR_CYAN_DIM, 1, cv2.LINE_AA)
+
+                # Render Each Layer (Plates & Custom Internal Wireframes)
+                for l_idx in range(self.hologram.num_layers):
+                    is_active = (self.hologram.active_layer_idx == l_idx)
+                    plate_color = COLOR_GOLD_HOVER if is_active else COLOR_CYAN_GLOW
+                    accent_color = COLOR_GOLD_BRIGHT if is_active else COLOR_CYAN_GLOW
+                    dim_color = (60, 160, 220) if is_active else COLOR_CYAN_DIM
+
+                    # Outer Plate Edges
+                    if l_idx in layer_projected_hulls:
+                        pts_2d, _ = layer_projected_hulls[l_idx]
+                        edges = [
+                            (0, 1), (1, 2), (2, 3), (3, 0),
+                            (4, 5), (5, 6), (6, 7), (7, 4),
+                            (0, 4), (1, 5), (2, 6), (3, 7)
+                        ]
+                        for e1, e2 in edges:
+                            cv2.line(glow_canvas, tuple(pts_2d[e1]), tuple(pts_2d[e2]), plate_color, 2 if is_active else 1, cv2.LINE_AA)
+
+                    # Custom Internal Wireframe Geometry
+                    internals = self.hologram.build_layer_internal_geometry(l_idx)
+                    for ptA, ptB, style in internals:
