@@ -778,3 +778,36 @@ class HandGestureTracker:
     def process_frame(self, frame_bgr):
         """Extracts 21 3D landmarks per hand and detects gestures."""
         h, w = frame_bgr.shape[:2]
+        self.hand_data_list = []
+        self.is_pinching = False
+        self.pinch_pos_2d = None
+        self.pointer_pos_2d = None
+        self.two_hand_dist = None
+
+        if self.backend is None:
+            self.state_label = "DESKTOP MODE [MOUSE CONTROLS]"
+            return
+
+        # -------------------------------------------------------------
+        # 1. RUN INFERENCE ACCORDING TO ACTIVE BACKEND
+        # -------------------------------------------------------------
+        detected_hands_raw = []
+
+        if self.backend == "tasks":
+            frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame_rgb)
+            results = self.detector.detect(mp_image)
+
+            if results and results.hand_landmarks:
+                for idx, lms in enumerate(results.hand_landmarks):
+                    raw_pts = [[lm.x * w, lm.y * h, lm.z * w] for lm in lms]
+                    label = "Hand"
+                    score = 0.95
+                    if idx < len(results.handedness) and len(results.handedness[idx]) > 0:
+                        cat = results.handedness[idx][0]
+                        label = cat.category_name or cat.display_name or "Hand"
+                        score = float(cat.score)
+                    detected_hands_raw.append((raw_pts, label, score))
+
+        elif self.backend == "solutions":
+            frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
