@@ -415,3 +415,36 @@ class TransformerHologram:
             # BPE Split Line cutting across the middle
             segments.append((np.array([-hw * 0.85, cy, 0.0]), np.array([hw * 0.85, cy, 0.0]), "accent"))
 
+        # -------------------------------------------------------------
+        # LAYER 2: TOKEN EMBEDDING + RoPE (Matrix grid + Sinusoidal Helix)
+        # -------------------------------------------------------------
+        elif idx == 1:
+            # 2D Coordinate Grid
+            for gx in np.linspace(-hw * 0.75, hw * 0.75, 5):
+                segments.append((np.array([gx, cy, -hd * 0.75]), np.array([gx, cy, hd * 0.75]), "dim"))
+            for gz in np.linspace(-hd * 0.75, hd * 0.75, 5):
+                segments.append((np.array([-hw * 0.75, cy, gz]), np.array([hw * 0.75, cy, gz]), "dim"))
+
+            # 3D Rotary Positional Embedding Spiral Helix
+            num_helix_pts = 36
+            theta_vals = np.linspace(-math.pi * 3.0, math.pi * 3.0, num_helix_pts)
+            rx = hw * 0.65
+            rz = hd * 0.65
+            for k in range(num_helix_pts - 1):
+                t1 = theta_vals[k]
+                t2 = theta_vals[k + 1]
+                pA = np.array([rx * (t1 / (math.pi * 3.0)), cy + math.sin(t1 * 2.0) * 8.0, rz * math.cos(t1 * 1.5)])
+                pB = np.array([rx * (t2 / (math.pi * 3.0)), cy + math.sin(t2 * 2.0) * 8.0, rz * math.cos(t2 * 1.5)])
+                segments.append((pA, pB, "accent"))
+
+        # -------------------------------------------------------------
+        # LAYER 3: RMSNorm (PRE-NORM) (Concentric Stabilizing Rings & Crosshair)
+        # -------------------------------------------------------------
+        elif idx == 2:
+            radii = [18.0, 36.0, 54.0]
+            num_ring_pts = 16
+            for r in radii:
+                for k in range(num_ring_pts):
+                    a1 = (2.0 * math.pi * k) / num_ring_pts
+                    a2 = (2.0 * math.pi * (k + 1)) / num_ring_pts
+                    pA = np.array([r * math.cos(a1), cy, r * math.sin(a1)])
