@@ -118,3 +118,36 @@ LLM_LAYERS_DATA = [
         ]
     },
     {
+        "id": 4,
+        "name": "QKV LINEAR PROJECTIONS",
+        "category": "ATTENTION SUBSPACE MAPPING",
+        "tensor_shape": "[B, S, d_model] -> Q, K, V in [B, n_heads, S, d_head]",
+        "formula": "Q = X * W_Q,   K = X * W_K,   V = X * W_V",
+        "role": "Query, Key, Value Projections & KV-Cache Management",
+        "details": [
+            "Linearly projects normalized token states into specialized subspace channels.",
+            "Supports Grouped-Query Attention (GQA) where multiple query heads share key/value.",
+            "In autoregressive inference, new K & V projections are cached into GPU VRAM."
+        ]
+    },
+    {
+        "id": 5,
+        "name": "CAUSAL MULTI-HEAD ATTENTION",
+        "category": "CORE CONTEXTUAL MIXING",
+        "tensor_shape": "[B, n_heads, S, d_head] -> [B, S, d_model]",
+        "formula": "Attention(Q,K,V) = softmax( (Q * K^T + M) / sqrt(d_k) ) * V",
+        "role": "Scaled Dot-Product Self-Attention with Causal Mask",
+        "details": [
+            "Computes pairwise dot-product affinity between token Queries and Keys.",
+            "Lower-triangular causal mask M forbids attention to future time steps (t' > t).",
+            "Values (V) are weighted by softmax attention probabilities to synthesize context."
+        ]
+    },
+    {
+        "id": 6,
+        "name": "RESIDUAL HIGHWAY + RMSNorm",
+        "category": "SIGNAL HIGHWAY // RESIDUAL CONNECTION",
+        "tensor_shape": "[B, S, d_model] -> [B, S, d_model]",
+        "formula": "x_(l+1) = x_l + Attention(RMSNorm(x_l))",
+        "role": "Identity Skip Connection & Pre-FFN Normalization",
+        "details": [
