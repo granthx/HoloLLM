@@ -31,7 +31,7 @@ Each layer renders specialized 3D internal wireframe geometry and displays rich 
 
 1. **INPUT & BPE TOKENIZER (`Text String -> [Batch, Seq_Len] (int64)`):**
    - *Geometry:* Segmented 3D token mini-blocks with a byte-pair splitting boundary line.
-   - *Math:* $T = \text{BPE\_Merge}(\text{UTF8\_Bytes}(\text{text}), \text{Merge\_Table}, V)$.
+   - *Math:* $T = \text{BPE-Merge}(\text{UTF8-Bytes}(\text{text}), \text{Merge-Table}, V)$.
 2. **TOKEN EMBEDDING + RoPE (`[B, S] -> [B, S, d_model]`):**
    - *Geometry:* 2D coordinate mesh overlaid with a 3D sinusoidal spiral helix wave.
    - *Math:* $R_\Theta^d \cdot x_m$, rotating query/key 2D slices to preserve relative token distance.
