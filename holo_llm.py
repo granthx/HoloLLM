@@ -613,3 +613,36 @@ class TransformerHologram:
             segments.append((np.array([-hw * 0.8, cy - fh,  hd * 0.8]), np.array([-25.0, cy,  25.0]), "dim"))
 
             # 3D Bar-Chart Logits Histogram
+            bar_heights = [10.0, 24.0, 8.0, 36.0, 16.0]
+            num_bars = len(bar_heights)
+            bar_w = 8.0
+            bar_d = 8.0
+            spacing_b = 14.0
+            bx_start = - ((num_bars - 1) * spacing_b) * 0.5
+
+            for b_i, bh in enumerate(bar_heights):
+                bx = bx_start + b_i * spacing_b
+                p1 = np.array([bx - bar_w * 0.5, cy, -bar_d * 0.5])
+                p2 = np.array([bx + bar_w * 0.5, cy, -bar_d * 0.5])
+                p3 = np.array([bx + bar_w * 0.5, cy,  bar_d * 0.5])
+                p4 = np.array([bx - bar_w * 0.5, cy,  bar_d * 0.5])
+
+                p5 = np.array([bx - bar_w * 0.5, cy + bh, -bar_d * 0.5])
+                p6 = np.array([bx + bar_w * 0.5, cy + bh, -bar_d * 0.5])
+                p7 = np.array([bx + bar_w * 0.5, cy + bh,  bar_d * 0.5])
+                p8 = np.array([bx - bar_w * 0.5, cy + bh,  bar_d * 0.5])
+
+                style = "accent" if b_i == 3 else "core" # b_i == 3 is the argmax predicted token!
+                for a, b in [(p1, p2), (p2, p3), (p3, p4), (p4, p1),
+                             (p5, p6), (p6, p7), (p7, p8), (p8, p5),
+                             (p1, p5), (p2, p6), (p3, p7), (p4, p8)]:
+                    segments.append((a, b, style))
+
+        return segments
+
+    def build_spine_rails(self):
+        """Builds longitudinal backbone rails connecting all 8 layers."""
+        y_bot = self.get_layer_y(0) - self.plate_h * 0.5
+        y_top = self.get_layer_y(7) + self.plate_h * 0.5
+        hw = self.plate_w * 0.5
+        hd = self.plate_d * 0.5
