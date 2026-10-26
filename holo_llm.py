@@ -1141,3 +1141,36 @@ class HoloLLMApp:
         self.mouse_dragging = False
         self.last_mouse_pos = (0, 0)
         self.mouse_cursor_pos = (0, 0)
+
+        # Performance Monitoring
+        self.prev_time = time.time()
+        self.fps = 30.0
+
+    def handle_mouse_events(self, event, x, y, flags, param):
+        """OpenCV Mouse callback for smooth desktop interaction fallback."""
+        self.mouse_cursor_pos = (x, y)
+
+        if event == cv2.EVENT_LBUTTONDOWN:
+            self.mouse_dragging = True
+            self.last_mouse_pos = (x, y)
+            self.auto_rotate = False
+        elif event == cv2.EVENT_MOUSEMOVE and self.mouse_dragging:
+            dx = x - self.last_mouse_pos[0]
+            dy = y - self.last_mouse_pos[1]
+            self.camera_3d.target_yaw += dx * 0.008
+            self.camera_3d.target_pitch -= dy * 0.008
+            self.last_mouse_pos = (x, y)
+        elif event == cv2.EVENT_LBUTTONUP:
+            self.mouse_dragging = False
+        elif event == cv2.EVENT_MOUSEWHEEL:
+            # Scroll to zoom
+            if flags > 0:
+                self.camera_3d.target_dist = max(350.0, self.camera_3d.target_dist - 40.0)
+            else:
+                self.camera_3d.target_dist = min(1200.0, self.camera_3d.target_dist + 40.0)
+
+    def run(self):
+        """Main execution loop."""
+        print("=" * 70)
+        print("  HoloLLM: AR Transformer Architecture Visualizer (Iron-Man / Jarvis)")
+        print("=" * 70)
