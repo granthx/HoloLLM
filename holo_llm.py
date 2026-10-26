@@ -811,3 +811,36 @@ class HandGestureTracker:
 
         elif self.backend == "solutions":
             frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+            results = self.detector.process(frame_rgb)
+
+            if results and results.multi_hand_landmarks:
+                for idx, (lms, handedness) in enumerate(zip(results.multi_hand_landmarks, results.multi_handedness)):
+                    raw_pts = [[lm.x * w, lm.y * h, lm.z * w] for lm in lms.landmark]
+                    label = handedness.classification[0].label
+                    score = handedness.classification[0].score
+                    detected_hands_raw.append((raw_pts, label, score))
+
+        if not detected_hands_raw:
+            self.state_label = "SCANNING FOR HANDS"
+            return
+
+        # -------------------------------------------------------------
+        # 2. APPLY EMA FILTERING & EXTRACT GESTURES
+        # -------------------------------------------------------------
+        for i, (raw_pts, label, score) in enumerate(detected_hands_raw):
+            raw_pts = np.array(raw_pts, dtype=np.float32)
+
+            hand_key = f"{label}_{i}"
+            if hand_key in self.prev_landmarks:
+                smoothed_pts = self.alpha_ema * raw_pts + (1.0 - self.alpha_ema) * self.prev_landmarks[hand_key]
+            else:
+                smoothed_pts = raw_pts
+            self.prev_landmarks[hand_key] = smoothed_pts
+
+            # 4: Thumb Tip, 8: Index Tip, 0: Wrist
+            thumb_tip = smoothed_pts[4, :2]
+            index_tip = smoothed_pts[8, :2]
+            wrist     = smoothed_pts[0, :2]
+
+            pinch_dist = float(np.linalg.norm(thumb_tip - index_tip))
+            is_hand_pinched = pinch_dist < 44.0
