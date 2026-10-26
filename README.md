@@ -1,10 +1,10 @@
-# HoloLLM: Interactive AR Transformer Architecture Visualizer 🌌🦾
+# HoloLLM: Interactive AR Transformer Architecture Visualizer
 
 An Iron-Man / Jarvis-inspired interactive Augmented Reality (AR) visualizer of a modern **Transformer / Large Language Model (LLM)** architecture (LLaMA / GPT series) built with **OpenCV**, **MediaPipe CNN Hand Landmark Tracking**, and **pure NumPy 3D perspective mathematics**.
 
 ---
 
-## ⚡ Key Highlights
+## Key Highlights
 
 - **3D Perspective Projection Engine:** Built from first principles in NumPy ($R_x, R_y, R_z$, depth clipping, pinhole camera projection).
 - **8 Distinct Architectural Layers:** Each layer features custom 3D wireframes reflecting its exact mathematical function (sinusoidal RoPE helix, RMSNorm rings, QKV projection rays, causal attention matrix, SwiGLU expansion diamond, residual highway bypass, next-token softmax histogram).
@@ -14,7 +14,7 @@ An Iron-Man / Jarvis-inspired interactive Augmented Reality (AR) visualizer of a
 
 ---
 
-## 🖐️ Hand Gesture Control System
+## Hand Gesture Control System
 
 | Gesture | Action | Visual Feedback |
 | :--- | :--- | :--- |
@@ -25,7 +25,7 @@ An Iron-Man / Jarvis-inspired interactive Augmented Reality (AR) visualizer of a
 
 ---
 
-## 🧠 The 8 Interactive LLM Layers
+## The 8 Interactive LLM Layers
 
 Each layer renders specialized 3D internal wireframe geometry and displays rich tensor math when inspected:
 
@@ -56,7 +56,7 @@ Each layer renders specialized 3D internal wireframe geometry and displays rich 
 
 ---
 
-## ⌨️ Desktop Fallback & Keyboard Shortcuts
+## Desktop Fallback & Keyboard Shortcuts
 
 If you are running without a webcam or prefer mouse/keyboard control:
 
@@ -71,17 +71,5 @@ If you are running without a webcam or prefer mouse/keyboard control:
 - **`[+]` / `[-]`**: Zoom in / out
 - **`[Q]` / `[ESC]`**: Exit application
 
----
-
-## 🚀 Quickstart & Installation
-
-### 1. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Run the Application
-```bash
-python holo_llm.py
 ```
 *(On first run, `holo_llm.py` will automatically download Google's lightweight `hand_landmarker.task` model file).*
