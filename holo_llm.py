@@ -910,3 +910,36 @@ class JarvisHUDRenderer:
     """Renders Iron-Man/Jarvis HUD graphics, holographic panels, ASCII math, and glows."""
 
     @staticmethod
+    def draw_chamfered_panel(img, x, y, w, h, chamfer=16, color_bg=(15, 20, 28), color_border=COLOR_HUD_BORDER, alpha=0.78):
+        """Draws a futuristic translucent panel with angled chamfered corners."""
+        pts = np.array([
+            [x + chamfer, y],
+            [x + w - chamfer, y],
+            [x + w, y + chamfer],
+            [x + w, y + h - chamfer],
+            [x + w - chamfer, y + h],
+            [x + chamfer, y + h],
+            [x, y + h - chamfer],
+            [x, y + chamfer]
+        ], dtype=np.int32)
+
+        overlay = img.copy()
+        cv2.fillPoly(overlay, [pts], color_bg)
+        cv2.addWeighted(overlay, alpha, img, 1.0 - alpha, 0, img)
+        cv2.polylines(img, [pts], True, color_border, 1, cv2.LINE_AA)
+
+        # High-tech corner bracket accents
+        arm = 12
+        cv2.line(img, (x, y + chamfer), (x, y + chamfer + arm), COLOR_CYAN_GLOW, 2, cv2.LINE_AA)
+        cv2.line(img, (x + w, y + chamfer), (x + w, y + chamfer + arm), COLOR_CYAN_GLOW, 2, cv2.LINE_AA)
+        cv2.line(img, (x, y + h - chamfer), (x, y + h - chamfer - arm), COLOR_CYAN_GLOW, 2, cv2.LINE_AA)
+        cv2.line(img, (x + w, y + h - chamfer), (x + w, y + h - chamfer - arm), COLOR_CYAN_GLOW, 2, cv2.LINE_AA)
+
+    @staticmethod
+    def draw_top_status_bar(img, fps, state_text, expansion_pct, tracking_online=True):
+        """Draws top-left system telemetry: FPS, CNN status, and expansion bar."""
+        x, y, w, h = 20, 20, 420, 105
+        JarvisHUDRenderer.draw_chamfered_panel(img, x, y, w, h, chamfer=12, color_bg=(10, 15, 24), color_border=COLOR_CYAN_DIM)
+
+        # Title
+        cv2.putText(img, "JARVIS NEURAL CORE // HOLO-LLM v2.4", (x + 16, y + 26),
