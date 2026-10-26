@@ -844,3 +844,36 @@ class HandGestureTracker:
 
             pinch_dist = float(np.linalg.norm(thumb_tip - index_tip))
             is_hand_pinched = pinch_dist < 44.0
+
+            index_len = float(np.linalg.norm(index_tip - wrist))
+            middle_len = float(np.linalg.norm(smoothed_pts[12, :2] - wrist))
+            ring_len = float(np.linalg.norm(smoothed_pts[16, :2] - wrist))
+            is_index_pointing = (not is_hand_pinched) and (index_len > middle_len * 1.15) and (index_len > ring_len * 1.25)
+
+            self.hand_data_list.append({
+                "label": label,
+                "score": score,
+                "landmarks": smoothed_pts,
+                "thumb_tip": thumb_tip,
+                "index_tip": index_tip,
+                "wrist": wrist,
+                "pinch_dist": pinch_dist,
+                "is_pinched": is_hand_pinched,
+                "is_pointing": is_index_pointing
+            })
+
+        # -------------------------------------------------------------
+        # 3. INTERPRET SINGLE & TWO-HANDED GESTURES
+        # -------------------------------------------------------------
+        detected_count = len(self.hand_data_list)
+
+        if detected_count == 1:
+            h0 = self.hand_data_list[0]
+            if h0["is_pinched"]:
+                self.is_pinching = True
+                self.pinch_pos_2d = h0["index_tip"]
+                self.state_label = "SINGLE-HAND PINCH [ORBIT ROTATION]"
+            elif h0["is_pointing"]:
+                self.pointer_pos_2d = h0["index_tip"]
+                self.state_label = "INDEX POINTER [TOUCH INSPECTING]"
+            else:
