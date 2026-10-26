@@ -1438,3 +1438,16 @@ class HoloLLMApp:
                     self.hologram.locked_layer_idx = None
 
         finally:
+            self.tracker.close()
+            if not use_synthetic:
+                cap.release()
+            cv2.destroyAllWindows()
+            print("\nHoloLLM session terminated cleanly.")
+
+
+# =============================================================================
+# ENTRY POINT
+# =============================================================================
+if __name__ == "__main__":
+    app = HoloLLMApp()
+    app.run()

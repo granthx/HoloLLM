@@ -34,6 +34,54 @@ Each layer renders specialized 3D internal wireframe geometry and displays rich 
    - *Math:* $T = \text{BPE\_Merge}(\text{UTF8\_Bytes}(\text{text}), \text{Merge\_Table}, V)$.
 2. **TOKEN EMBEDDING + RoPE (`[B, S] -> [B, S, d_model]`):**
    - *Geometry:* 2D coordinate mesh overlaid with a 3D sinusoidal spiral helix wave.
-   - *Math:* $R_\Theta^d \cdot x_m$, rotating query/key 2D s
+   - *Math:* $R_\Theta^d \cdot x_m$, rotating query/key 2D slices to preserve relative token distance.
+3. **RMSNorm (PRE-NORM) (`[B, S, d_model] -> [B, S, d_model]`):**
+   - *Geometry:* Concentric stabilizing polygonal rings and radial crosshairs with central diamond $\Diamond$.
+   - *Math:* $\bar{a}_i = \frac{a_i}{\text{RMS}(\mathbf{a})} g_i$, stabilizing gradient variance across deep stacks.
+4. **QKV LINEAR PROJECTIONS (`[B, S, d_model] -> 3 x [B, n_heads, S, d_head]`):**
+   - *Geometry:* 3 parallel sub-slabs (Query, Key, Value) with diverging projection rays.
+   - *Math:* $Q = X W_Q, K = X W_K, V = X W_V$, updating KV-Cache in VRAM.
+5. **CAUSAL MULTI-HEAD ATTENTION (`[B, n_heads, S, d_head] -> [B, S, d_model]`):**
+   - *Geometry:* Lower-triangular matrix grid with masked cross-hatch cells and arched attention curves.
+   - *Math:* $\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^T + M}{\sqrt{d_k}}\right) V$.
+6. **RESIDUAL HIGHWAY + RMSNorm (`[B, S, d_model]`):**
+   - *Geometry:* Twin bypass conduits looping wide around the stack into a summation node $\oplus$.
+   - *Math:* $x_{l+1} = x_l + \text{Attention}(\text{RMSNorm}(x_l))$, preserving unobstructed signal flow.
+7. **SwiGLU FEED-FORWARD (MLP) (`[B, S, d] -> [B, S, 4d] -> [B, S, d]`):**
+   - *Geometry:* Double-hourglass diamond expansion prism ($d \to 4d \to d$).
+   - *Math:* $\text{SwiGLU}(x) = (\text{Swish}(x W_{\text{gate}}) \otimes (x W_{\text{up}})) W_{\text{down}}$.
+8. **LM HEAD & SOFTMAX LOGITS (`[B, S, d_model] -> [B, S, Vocab_Size]`):**
+   - *Geometry:* Converging funnel pyramid topped with a 3D bar-chart histogram of top token logits.
+   - *Math:* $P(w_t \mid w_{<t}) = \text{softmax}(\text{Logits} / T)$, sampling next token via Top-$p$ / Top-$k$.
 
-(More details coming soon...)
+---
+
+## ⌨️ Desktop Fallback & Keyboard Shortcuts
+
+If you are running without a webcam or prefer mouse/keyboard control:
+
+- **Mouse Left-Click Drag:** Orbit rotate 3D hologram in Pitch & Yaw
+- **Mouse Scroll Wheel:** Zoom camera in / out
+- **Mouse Hover:** Acts as holographic pointer to inspect layers
+- **`[SPACE]`**: Toggle Explode / Collapse between monolithic core and separated stack
+- **`[R]`**: Reset rotation, camera zoom, and layer selection
+- **`[A]`**: Toggle cinematic auto-rotation
+- **`[1]` - `[8]`**: Directly select and inspect layers 1 through 8
+- **`[0]`**: Clear layer selection (return to general overview)
+- **`[+]` / `[-]`**: Zoom in / out
+- **`[Q]` / `[ESC]`**: Exit application
+
+---
+
+## 🚀 Quickstart & Installation
+
+### 1. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Run the Application
+```bash
+python holo_llm.py
+```
+*(On first run, `holo_llm.py` will automatically download Google's lightweight `hand_landmarker.task` model file).*
