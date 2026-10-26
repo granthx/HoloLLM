@@ -646,3 +646,36 @@ class TransformerHologram:
         y_top = self.get_layer_y(7) + self.plate_h * 0.5
         hw = self.plate_w * 0.5
         hd = self.plate_d * 0.5
+
+        rails = [
+            # 4 outer corner rails
+            (np.array([-hw, y_bot, -hd]), np.array([-hw, y_top, -hd])),
+            (np.array([ hw, y_bot, -hd]), np.array([ hw, y_top, -hd])),
+            (np.array([ hw, y_bot,  hd]), np.array([ hw, y_top,  hd])),
+            (np.array([-hw, y_bot,  hd]), np.array([-hw, y_top,  hd])),
+            # Central dataflow core spine
+            (np.array([0.0, y_bot, 0.0]), np.array([0.0, y_top, 0.0]))
+        ]
+        return rails
+
+    def get_particle_positions_3d(self):
+        """Returns 3D coordinates for all active dataflow particles."""
+        y_bot = self.get_layer_y(0)
+        y_top = self.get_layer_y(7)
+        hw = self.plate_w * 0.5
+        hd = self.plate_d * 0.5
+
+        corner_offsets = [
+            np.array([0.0, 0.0, 0.0]),
+            np.array([-hw, 0.0, -hd]),
+            np.array([ hw, 0.0, -hd]),
+            np.array([ hw, 0.0,  hd]),
+            np.array([-hw, 0.0,  hd]),
+        ]
+
+        pts_3d = []
+        for p in self.particles:
+            cur_y = y_bot + p["t"] * (y_top - y_bot)
+            base_offset = corner_offsets[p["rail"]]
+            pt = base_offset + np.array([p["offset"][0], cur_y, p["offset"][1]], dtype=np.float32)
+            pts_3d.append(pt)
