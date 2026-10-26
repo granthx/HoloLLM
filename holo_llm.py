@@ -382,3 +382,36 @@ class TransformerHologram:
 
         # -------------------------------------------------------------
         # LAYER 1: INPUT & BPE TOKENIZER (Grid of discrete subword blocks)
+        # -------------------------------------------------------------
+        if idx == 0:
+            grid_cols, grid_rows = 4, 3
+            bw = (self.plate_w * 0.75) / grid_cols
+            bd = (self.plate_d * 0.70) / grid_rows
+            start_x = - (grid_cols * bw) * 0.5
+            start_z = - (grid_rows * bd) * 0.5
+
+            for r in range(grid_rows):
+                for c in range(grid_cols):
+                    bx = start_x + c * bw + 2.0
+                    bz = start_z + r * bd + 2.0
+                    w_sub = bw - 4.0
+                    d_sub = bd - 4.0
+                    h_sub = 4.0 + (math.sin(c * 1.5 + r * 2.0) * 2.5)
+
+                    p1 = [bx, cy - h_sub, bz]
+                    p2 = [bx + w_sub, cy - h_sub, bz]
+                    p3 = [bx + w_sub, cy - h_sub, bz + d_sub]
+                    p4 = [bx, cy - h_sub, bz + d_sub]
+                    p5 = [bx, cy + h_sub, bz]
+                    p6 = [bx + w_sub, cy + h_sub, bz]
+                    p7 = [bx + w_sub, cy + h_sub, bz + d_sub]
+                    p8 = [bx, cy + h_sub, bz + d_sub]
+
+                    for a, b in [(p1, p2), (p2, p3), (p3, p4), (p4, p1),
+                                 (p5, p6), (p6, p7), (p7, p8), (p8, p5),
+                                 (p1, p5), (p2, p6), (p3, p7), (p4, p8)]:
+                        segments.append((np.array(a), np.array(b), "core"))
+
+            # BPE Split Line cutting across the middle
+            segments.append((np.array([-hw * 0.85, cy, 0.0]), np.array([hw * 0.85, cy, 0.0]), "accent"))
+
