@@ -1240,3 +1240,36 @@ class HoloLLMApp:
                         dy = cur_pinch[1] - self.last_pinch_pos[1]
                         self.camera_3d.target_yaw += dx * 0.009
                         self.camera_3d.target_pitch -= dy * 0.009
+                    self.last_pinch_pos = cur_pinch
+                else:
+                    self.last_pinch_pos = None
+
+                # Gesture: Two-handed distance for explode / collapse
+                if self.tracker.two_hand_dist is not None:
+                    # Map distance between 100px and 550px to expansion [0.0, 1.0]
+                    norm_exp = np.clip((self.tracker.two_hand_dist - 120.0) / 400.0, 0.0, 1.0)
+                    self.hologram.target_expansion = float(norm_exp)
+
+                # Auto-rotate when idle
+                if self.auto_rotate:
+                    self.camera_3d.target_yaw += 0.35 * dt
+
+                # Update physics & dampening
+                self.camera_3d.update(dt)
+                self.hologram.update_physics(dt)
+
+                # -------------------------------------------------------------
+                # 3. DARKEN FRAME & CREATE GLOW CANVAS
+                # -------------------------------------------------------------
+                # Darken the real-world frame so neon cybernetic overlays pop with high contrast
+                darkened_frame = cv2.convertScaleAbs(frame, alpha=0.68, beta=0)
+                glow_canvas = np.zeros_like(frame)
+
+                # -------------------------------------------------------------
+                # 4. RENDER 3D TRANSFORMER HOLOGRAM WIREFRAMES
+                # -------------------------------------------------------------
+                # Decide pointer coordinates for layer hit-testing (Index finger or Mouse cursor)
+                if self.tracker.pointer_pos_2d is not None:
+                    pointer_xy = (float(self.tracker.pointer_pos_2d[0]), float(self.tracker.pointer_pos_2d[1]))
+                else:
+                    pointer_xy = (float(self.mouse_cursor_pos[0]), float(self.mouse_cursor_pos[1]))
