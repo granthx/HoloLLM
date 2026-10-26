@@ -71,5 +71,3 @@ If you are running without a webcam or prefer mouse/keyboard control:
 - **`[+]` / `[-]`**: Zoom in / out
 - **`[Q]` / `[ESC]`**: Exit application
 
-```
-*(On first run, `holo_llm.py` will automatically download Google's lightweight `hand_landmarker.task` model file).*
