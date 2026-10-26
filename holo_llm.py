@@ -943,3 +943,36 @@ class JarvisHUDRenderer:
 
         # Title
         cv2.putText(img, "JARVIS NEURAL CORE // HOLO-LLM v2.4", (x + 16, y + 26),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.55, COLOR_GOLD_BRIGHT, 2, cv2.LINE_AA)
+
+        # Status & FPS
+        status_color = COLOR_GREEN_OK if tracking_online else COLOR_ORANGE_ALERT
+        status_str = "ONLINE (21 LNDMK)" if tracking_online else "OFFLINE // MOUSE FALLBACK"
+        cv2.circle(img, (x + 22, y + 50), 4, status_color, -1, cv2.LINE_AA)
+        cv2.putText(img, f"HAND CNN: {status_str}", (x + 34, y + 54),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.42, COLOR_HUD_TEXT, 1, cv2.LINE_AA)
+        cv2.putText(img, f"FPS: {fps:4.1f}", (x + w - 85, y + 54),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.45, COLOR_CYAN_GLOW, 1, cv2.LINE_AA)
+
+        # Gesture State
+        cv2.putText(img, f"STATE: {state_text[:30]}", (x + 16, y + 74),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.40, COLOR_GOLD_HOVER, 1, cv2.LINE_AA)
+
+        # Expansion Progress Bar
+        bar_x, bar_y, bar_w, bar_h = x + 16, y + 84, w - 32, 8
+        cv2.rectangle(img, (bar_x, bar_y), (bar_x + bar_w, bar_y + bar_h), (35, 45, 60), 1)
+        fill_w = int(bar_w * (expansion_pct / 100.0))
+        if fill_w > 0:
+            cv2.rectangle(img, (bar_x + 1, bar_y + 1), (bar_x + fill_w, bar_y + bar_h - 1), COLOR_CYAN_GLOW, -1)
+        cv2.putText(img, f"EXPANSION: {int(expansion_pct)}%", (x + w - 125, y + 92),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.35, COLOR_CYAN_GLOW, 1, cv2.LINE_AA)
+
+    @staticmethod
+    def draw_top_right_camera_telemetry(img, pitch_deg, yaw_deg, zoom_factor):
+        """Draws top-right orientation & spatial telemetry."""
+        h_img, w_img = img.shape[:2]
+        w, h = 260, 68
+        x = w_img - w - 20
+        y = 20
+        JarvisHUDRenderer.draw_chamfered_panel(img, x, y, w, h, chamfer=10, color_bg=(10, 15, 24), color_border=COLOR_CYAN_DIM)
+
